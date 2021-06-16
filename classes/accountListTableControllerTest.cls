@@ -1,27 +1,27 @@
-/**
- * Created by Admin on 12.05.2021.
- */
-
 @IsTest
 private class accountListTableControllerTest {
 
     @TestSetup
     static void setup() {
-        // Create common test accounts
-        List<Account> testAcct = new List<Account>();
+        List<Account> testAccount = new List<Account>();
         for (Integer i = 0; i < 2; i++) {
-            testAcct.add(new Account(Name = 'TestAcct' + i));
+            testAccount.add(new Account(Name = 'testAccount' + i));
         }
-        insert testAcct;
 
+        insert testAccount;
     }
+
     @IsTest
     static void getAccountRecordsTest() {
+
         Test.startTest();
         List<Account> accounts = accountListTableController.getAccountRecords();
         Test.stopTest();
 
-        List<Account> createdAccounts = [SELECT Name, Rating, Id FROM Account];
+        List<Account> createdAccounts = [
+                SELECT Name, Rating, Id
+                FROM Account
+        ];
         for (Integer i = 0; i < accounts.size(); i++) {
             System.assert(accounts[i].Name == createdAccounts[i].Name);
             System.assert(accounts[i].Rating == createdAccounts[i].Rating);
@@ -31,7 +31,8 @@ private class accountListTableControllerTest {
 
     @IsTest
     static void saveDraftValuesTest() {
-        Account[] acct = new Account[]{};
+        Account[] acct = new Account[]{
+        };
 
         Test.startTest();
         accountListTableController.saveDraftValues(acct);
@@ -45,22 +46,25 @@ private class accountListTableControllerTest {
 
     @IsTest
     static void deleteAccountsTest() {
-        List<Id> ldsTest = new List<Id>();
-        Id testAcc;
-        Account deleteAccount = [SELECT Id FROM Account LIMIT 1];
-        ldsTest.add(testAcc);
+        List<Id> listTest = new List<Id>();
+        Id testAccount;
+        Account deleteAccount = [
+                SELECT Id
+                FROM Account
+                LIMIT 1
+        ];
+        listTest.add(testAccount);
         delete deleteAccount;
 
         Test.startTest();
         try {
-            accountListTableController.deleteAccounts(ldsTest);
+            accountListTableController.deleteAccounts(listTest);
         } catch (Exception e) {
 
         }
         Test.stopTest();
 
         System.assertEquals(1, [SELECT Id FROM Account].size());
-
     }
 
 }

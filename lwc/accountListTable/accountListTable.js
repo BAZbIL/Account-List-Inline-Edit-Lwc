@@ -1,15 +1,11 @@
-/**
- * Created by Admin on 06.05.2021.
- */
-
-import {LightningElement, wire, api, track} from 'lwc';
+import {LightningElement, wire, api} from 'lwc';
 import {refreshApex} from '@salesforce/apex';
 import {ShowToastEvent} from 'lightning/platformShowToastEvent';
 import getAccountRecords from '@salesforce/apex/accountListTableController.getAccountRecords';
 import saveDraftValues from '@salesforce/apex/accountListTableController.saveDraftValues';
-import delSelectedAcc from '@salesforce/apex/accountListTableController.deleteAccounts';
+import deleteAccounts from '@salesforce/apex/accountListTableController.deleteAccounts';
 
-const COLUMNS = [
+const COLUMNS_EDITABLE_ACTIVATE = [
     {label: 'Account Name', fieldName: 'Name', type: 'text', editable: true},
     {
         label: 'Rating',
@@ -41,7 +37,7 @@ const COLUMNS = [
     }
 ];
 
-const COLUMNS2 = [
+const COLUMNS_EDITABLE_DEACTIVATE = [
     {label: 'Account Name', fieldName: 'Name', type: 'text'},
     {label: 'Rating', fieldName: 'Rating', type: 'text'},
 
@@ -54,9 +50,10 @@ const COLUMNS2 = [
 ];
 
 export default class AccountListTable extends LightningElement {
+
     @api recordId;
-    columns2 = COLUMNS2;
-    columns = COLUMNS;
+    columnsEditableActivate = COLUMNS_EDITABLE_ACTIVATE;
+    columnsEditableDeactivate = COLUMNS_EDITABLE_DEACTIVATE;
     records;
     lastSavedData;
     error;
@@ -122,34 +119,19 @@ export default class AccountListTable extends LightningElement {
         this.privateChildren[item.name][item.guid] = item;
     }
 
-    handleCancel(event) {
-        event.preventDefault();
-        this.records = JSON.parse(JSON.stringify(this.lastSavedData));
-        this.handleWindowOnclick('reset');
-        this.draftValues = [];
-        this.showHidePencil = true;
-    }
-
-    handleCellChange(event) {
-        event.preventDefault();
-        this.updateDraftValues(event.detail.draftValues[0]);
-
-    }
-
-    handleDelete(event) {
+    handleRowAction(event) {
         const row = event.detail.row;
         if (event.detail.action.name === 'delete_account') {
             this.record = event.detail.row;
-            this.deleteAcc(row);
+            this.deleteCurrentAccounts(row);
         }
     }
 
-    deleteAcc(currentRow) {
+    deleteCurrentAccounts(currentRow) {
         let currentRecord = [];
         currentRecord.push(currentRow.Id);
-        delSelectedAcc({lstAccIds: currentRecord})
+        deleteAccounts({lstOppIds: currentRecord})
             .then(() => {
-
                 this.dispatchEvent(new ShowToastEvent({
                     title: 'Success delete:)',
                     message: currentRow.Name + ' ' + ' Account deleted.',
@@ -157,7 +139,6 @@ export default class AccountListTable extends LightningElement {
                 }),);
 
                 return refreshApex(this.wiredRecords);
-
             })
             .catch(error => {
                 this.dispatchEvent(new ShowToastEvent({
@@ -168,29 +149,32 @@ export default class AccountListTable extends LightningElement {
             });
     }
 
+    handleCellChange(event) {
+        event.preventDefault();
+        this.updateDraftValues(event.detail.draftValues[0]);
+    }
 
-    handleValueChange(event) {
+    picklistValueChange(event) {
         event.stopPropagation();
-        let dataRecieved = event.detail.data;
+        let dataReceived = event.detail.data;
         let updatedItem;
-        switch (dataRecieved.label) {
+        switch (dataReceived.label) {
             case 'Rating':
                 updatedItem = {
-                    Id: dataRecieved.context,
-                    Rating: dataRecieved.value
+                    Id: dataReceived.context,
+                    Rating: dataReceived.value
                 };
                 this.setClassesOnData(
-                    dataRecieved.context,
+                    dataReceived.context,
                     'ratingClass',
                     'slds-cell-edit slds-is-edited'
                 );
                 break;
             default:
-                this.setClassesOnData(dataRecieved.context, '', '');
+                this.setClassesOnData(dataReceived.context, '', '');
                 break;
 
         }
-
         this.updateDataValues(updatedItem);
         this.updateDraftValues(updatedItem);
     }
@@ -226,20 +210,20 @@ export default class AccountListTable extends LightningElement {
         this.showHidePencil = false;
     }
 
-    handleEdit(event) {
+    picklistEdit(event) {
         event.preventDefault();
-        let dataRecieved = event.detail.data;
-        this.handleWindowOnclick(dataRecieved.context);
-        switch (dataRecieved.label) {
+        let dataReceived = event.detail.data;
+        this.handleWindowOnclick(dataReceived.context);
+        switch (dataReceived.label) {
             case 'Rating':
                 this.setClassesOnData(
-                    dataRecieved.context,
+                    dataReceived.context,
                     'ratingClass',
                     'slds-cell-edit'
                 );
                 break;
             default:
-                this.setClassesOnData(dataRecieved.context, '', '');
+                this.setClassesOnData(dataReceived.context, '', '');
                 break;
         }
     }
@@ -253,7 +237,15 @@ export default class AccountListTable extends LightningElement {
         });
     }
 
-    handleSave(event) {
+    cancelInlineEdit(event) {
+        event.preventDefault();
+        this.records = JSON.parse(JSON.stringify(this.lastSavedData));
+        this.handleWindowOnclick('reset');
+        this.draftValues = [];
+        this.showHidePencil = true;
+    }
+
+    saveInlineEdit(event) {
         event.preventDefault();
         this.showSpinner = true;
         saveDraftValues({data: this.draftValues})

@@ -1,7 +1,3 @@
-/**
- * Created by Admin on 10.05.2021.
- */
-
 import {LightningElement, api} from 'lwc';
 import {loadStyle} from 'lightning/platformResourceLoader';
 import CustomDataTableResource from '@salesforce/resourceUrl/CustomDataTable';

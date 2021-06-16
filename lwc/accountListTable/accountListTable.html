@@ -1,33 +1,27 @@
-<!--
- - Created by Admin on 06.05.2021.
- -->
-
-<!-- Account List Table -->
 <template>
     <lightning-card title="Account Inline Table" icon-name="custom:custom20">
         <div onitemregister={handleItemRegister}>
             <template if:true={showHidePencil}>
                 <c-custom-data-table class="slds-max-medium-table_stacked" oncellchange={handleCellChange}
-                                     onvaluechange={handleValueChange} data={records} columns={columns}
+                                     onvaluechange={picklistValueChange} data={records} columns={columnsEditableActivate}
                                      show-row-number-column="false"
-                                     key-field="Id" draft-values={draftValues} onsave={handleSave} data-record="Id"
-                                     onedit={handleEdit} onrowaction={handleDelete}
-                                     hide-checkbox-column="true" oncancel={handleCancel}>
+                                     key-field="Id" draft-values={draftValues} onsave={saveInlineEdit} data-record="Id"
+                                     onedit={picklistEdit} onrowaction={handleRowAction}
+                                     hide-checkbox-column="true" oncancel={cancelInlineEdit}>
                 </c-custom-data-table>
             </template>
         </div>
         <div onitemregister={handleItemRegister}>
             <template if:false={showHidePencil}>
-                <c-custom-data-table class="slds-max-medium-table_stacked" onvaluechange={handleValueChange}
-                                     oncellchange={handleCellChange} data={records} columns={columns2}
+                <c-custom-data-table class="slds-max-medium-table_stacked" onvaluechange={picklistValueChange}
+                                     oncellchange={handleCellChange} data={records} columns={columnsEditableDeactivate}
                                      show-row-number-column="false"
-                                     key-field="Id" draft-values={draftValues} onsave={handleSave} data-record="Id"
-                                     onedit={handleEdit} onrowaction={handleDelete}
-                                     hide-checkbox-column="true" oncancel={handleCancel}>
+                                     key-field="Id" draft-values={draftValues} onsave={saveInlineEdit} data-record="Id"
+                                     onedit={picklistEdit} onrowaction={handleRowAction}
+                                     hide-checkbox-column="true" oncancel={cancelInlineEdit}>
                 </c-custom-data-table>
             </template>
         </div>
-
         <div class="showSpinner" if:true={showSpinner}>
             <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
         </div>

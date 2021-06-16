@@ -1,4 +1,3 @@
-
 .slds-grid .slds-hyphenate {
     width: 100%
 }

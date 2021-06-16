@@ -15,13 +15,14 @@ public with sharing class accountListTableController {
                 JSON.serialize(data),
                 List<Account>.class
         );
+
         update listOfAccounts;
     }
 
     @AuraEnabled
-    public static void deleteAccounts(list<Id> lstAccIds) {
+    public static void deleteAccounts(List<Id> lstAccIds) {
         try {
-            list<Account> lstAccToDelete = new list<Account>();
+            List<Account> lstAccToDelete = new List<Account>();
             for (Id idAcc : lstAccIds) {
                 lstAccToDelete.add(new Account(Id = idAcc));
             }
